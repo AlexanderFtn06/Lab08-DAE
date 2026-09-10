@@ -18,6 +18,7 @@ class Exam(models.Model):
 class Question(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='questions')
     statement = models.CharField(max_length=255)
+    score = models.PositiveIntegerField(default=1)
 
     class Meta:
         ordering = ['id']

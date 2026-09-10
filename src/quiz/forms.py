@@ -16,10 +16,11 @@ class ExamForm(forms.ModelForm):
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ['exam', 'statement']
+        fields = ['exam', 'statement', 'score']
         widgets = {
             'exam': forms.Select(attrs={'class': 'form-control'}),
             'statement': forms.TextInput(attrs={'class': 'form-control'}),
+            'score': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
         }
 
 
