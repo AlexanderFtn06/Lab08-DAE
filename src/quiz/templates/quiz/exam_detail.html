@@ -1,0 +1,46 @@
+{% extends 'quiz/base.html' %}
+
+{% block title %}{{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ exam.title }}</h1>
+    <a href="{% url 'quiz:question_create' exam.pk %}" class="btn btn-primary">Add Question</a>
+</div>
+
+{% if exam.description %}
+<p class="lead">{{ exam.description }}</p>
+<hr>
+{% endif %}
+
+{% if exam.questions.all %}
+<h3>Questions</h3>
+{% for question in exam.questions.all %}
+<div class="card mb-3">
+    <div class="card-header">
+        <strong>Q{{ forloop.counter }}:</strong> {{ question.statement }}
+    </div>
+    <div class="card-body">
+        {% if question.choices.all %}
+        <ul class="list-group list-group-flush">
+            {% for choice in question.choices.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center {% if choice.is_correct %}list-group-item-success{% endif %}">
+                {{ choice.text }}
+                {% if choice.is_correct %}
+                <span class="badge bg-success">Correct</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">No choices yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="alert alert-info">No questions in this exam.</div>
+{% endif %}
+
+<a href="{% url 'quiz:exam_list' %}" class="btn btn-secondary mt-3">Back to Exams</a>
+{% endblock %}

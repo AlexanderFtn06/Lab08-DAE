@@ -1,0 +1,22 @@
+{% extends 'quiz/base.html' %}
+
+{% block title %}Exams{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Exams</h1>
+
+{% if exams %}
+<div class="list-group">
+    {% for exam in exams %}
+    <a href="{% url 'quiz:exam_detail' exam.pk %}" class="list-group-item list-group-item-action">
+        <h5 class="mb-1">{{ exam.title }}</h5>
+        <small class="text-muted">Created: {{ exam.created_at|date:"Y-m-d H:i" }}</small>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">No exams found.</div>
+{% endif %}
+
+<a href="{% url 'quiz:exam_detail' 1 %}" class="btn btn-secondary mt-3">Back</a>
+{% endblock %}
