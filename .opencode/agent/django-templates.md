@@ -2,11 +2,11 @@
 name: django-templates
 description: Creates ALL required templates: base, exam list, exam detail, AND question_form.html with full form and formset rendering real widgets ({{ form.field }}) and error block.
 tools:
-  - read
-  - write
-  - edit
-  - glob
-  - bash
+  read: true
+  write: true
+  edit: true
+  glob: true
+  bash: true
 ---
 
 # Django Templates Agent

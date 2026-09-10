@@ -2,10 +2,10 @@
 name: django-forms
 description: Creates ExamForm, QuestionForm, and ChoiceFormSet (inline formset). Keeps Meta.fields synchronized with actual model fields including any added later (like score).
 tools:
-  - read
-  - write
-  - edit
-  - glob
+  read: true
+  write: true
+  edit: true
+  glob: true
 ---
 
 # Django Forms Agent

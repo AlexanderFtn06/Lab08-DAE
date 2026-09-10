@@ -2,10 +2,10 @@
 name: django-models
 description: Declares and modifies Exam, Question, Choice models including their Meta classes. Follows Django conventions: singular model names, proper field types, relationships.
 tools:
-  - read
-  - write
-  - edit
-  - glob
+  read: true
+  write: true
+  edit: true
+  glob: true
 ---
 
 # Django Models Agent

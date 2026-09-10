@@ -2,10 +2,10 @@
 name: django-admin
 description: Registers Exam, Question, Choice models in Django admin. Guides superuser creation.
 tools:
-  - read
-  - write
-  - edit
-  - bash
+  read: true
+  write: true
+  edit: true
+  bash: true
 ---
 
 # Django Admin Agent

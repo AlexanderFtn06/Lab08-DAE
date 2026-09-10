@@ -2,10 +2,10 @@
 name: django-views
 description: Creates list, detail, and question create views with "exactly one correct choice" validation. On validation failure: no save, re-render form with user data, show visible error message.
 tools:
-  - read
-  - write
-  - edit
-  - glob
+  read: true
+  write: true
+  edit: true
+  glob: true
 ---
 
 # Django Views Agent

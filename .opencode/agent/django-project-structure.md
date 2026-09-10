@@ -2,11 +2,11 @@
 name: django-project-structure
 description: Creates the base Django project structure including venv, src/, config/, requirements.txt, .gitignore, and adds the quiz app to INSTALLED_APPS. No hardcoded credentials in settings.py.
 tools:
-  - bash
-  - write
-  - edit
-  - glob
-  - read
+  bash: true
+  write: true
+  edit: true
+  glob: true
+  read: true
 ---
 
 # Django Project Structure Agent

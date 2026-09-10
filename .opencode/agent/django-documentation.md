@@ -2,11 +2,11 @@
 name: django-documentation
 description: Writes evidence in Spanish for each development step following the exact methodology format: student name, development title, result screenshot, code, result explanation, test cases, and project structure screenshot.
 tools:
-  - read
-  - write
-  - edit
-  - glob
-  - bash
+  read: true
+  write: true
+  edit: true
+  glob: true
+  bash: true
 ---
 
 # Django Documentation Agent

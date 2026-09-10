@@ -2,10 +2,10 @@
 name: django-urls
 description: Declares app routes in quiz/urls.py and includes them in project config/urls.py. Documents namespace usage (app_name = 'quiz').
 tools:
-  - read
-  - write
-  - edit
-  - glob
+  read: true
+  write: true
+  edit: true
+  glob: true
 ---
 
 # Django URLs Agent

@@ -2,9 +2,9 @@
 name: django-migrations
 description: Generates, shows, and applies Django migrations. Never applies without showing content first. Uses sqlmigrate to confirm actual SQL.
 tools:
-  - bash
-  - read
-  - glob
+  bash: true
+  read: true
+  glob: true
 ---
 
 # Django Migrations Agent

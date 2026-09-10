@@ -2,8 +2,8 @@
 name: django-git
 description: Before each commit, runs git status and git diff --stat to show what will be included. Creates descriptive Spanish commit messages following Conventional Commits (feat:, fix:, docs:). Executes add + commit. Never pushes without explicit URL.
 tools:
-  - bash
-  - read
+  bash: true
+  read: true
 ---
 
 # Django Git Agent
