@@ -1,0 +1,39 @@
+@baseUrl = http://127.0.0.1:8000/api
+@examId = 5
+@questionId = 15
+
+### Listar preguntas (esperado 200)
+GET {{baseUrl}}/questions/
+
+### Detalle de pregunta (esperado 200)
+GET {{baseUrl}}/questions/{{questionId}}/
+
+### Crear pregunta (esperado 201)
+# @name createQuestion
+POST {{baseUrl}}/questions/
+Content-Type: application/json
+
+{
+  "exam": {{examId}},
+  "statement": "What is an HTTP status code?",
+  "score": 2,
+  "choices": [
+    {"text": "A code indicating the result of an HTTP request", "is_correct": true},
+    {"text": "A programming language", "is_correct": false},
+    {"text": "A database type", "is_correct": false}
+  ]
+}
+
+### Modificar parcialmente (esperado 200)
+PATCH {{baseUrl}}/questions/{{createQuestion.response.body.id}}/
+Content-Type: application/json
+
+{
+  "statement": "What is an HTTP response status code?"
+}
+
+### Eliminar pregunta (esperado 204)
+DELETE {{baseUrl}}/questions/{{createQuestion.response.body.id}}/
+
+### Comprobar eliminación (esperado 404)
+GET {{baseUrl}}/questions/{{createQuestion.response.body.id}}/
