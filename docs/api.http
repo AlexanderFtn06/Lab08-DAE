@@ -82,3 +82,23 @@ Content-Type: application/json
     {"text": "Choice C", "is_correct": false}
   ]
 }
+
+# ===== Paso 10: filtro, búsqueda y paginación =====
+
+### Filtrar preguntas por examen (esperado 200, solo preguntas de ese examen)
+GET {{baseUrl}}/questions/?exam={{examId}}
+
+### Buscar preguntas con "list" en el enunciado (esperado 200)
+GET {{baseUrl}}/questions/?search=list
+
+### Segunda página (esperado 200)
+GET {{baseUrl}}/questions/?page=2
+
+### Última página (página 3, incompleta, esperado 200)
+GET {{baseUrl}}/questions/?page=3
+
+### Filtro combinado con paginación (esperado 200)
+GET {{baseUrl}}/questions/?exam={{examId}}&page=2
+
+### Página que no existe (esperado 404)
+GET {{baseUrl}}/questions/?page=99
