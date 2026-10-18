@@ -12,6 +12,8 @@
 
 **Permisos:** `AllowAny` (solo para desarrollo; en producción usar `IsAuthenticatedOrReadOnly`)
 
+> **Nota:** Los ids de los ejemplos corresponden a los datos de `seed_quiz`; si se vuelve a ejecutar, los ids cambian (consultar `/api/exams/` y `/api/questions/`).
+
 ---
 
 ## 1. Tabla principal de endpoints
@@ -20,16 +22,17 @@
 |---------|-----------|--------|-------------------|-------------------|
 | **Exams** | `/exams/` | GET | — | 200: lista paginada de exámenes |
 | **Exams** | `/exams/` | POST | `{"title":"Nuevo Examen","description":"Desc"}` | 201: examen creado con `id`, `title`, `description`, `created_at` |
-| **Exams** | `/exams/{id}/` | GET | — | 200: examen con sus preguntas anidadas |
+| **Exams** | `/exams/{id}/` | GET | — | 200: examen con `id`, `title`, `description`, `created_at` |
 | **Exams** | `/exams/{id}/` | PATCH | `{"title":"Título actualizado"}` | 200: examen actualizado |
-| **Exams** | `/exams/{id}/` | DELETE | — | 204: sin contenido |
+| **Exams** | `/exams/{id}/` | DELETE | — | 204: sin contenido; elimina en cascada sus preguntas y opciones |
 | **Questions** | `/questions/` | GET | — | 200: lista paginada de preguntas |
-| **Questions** | `/questions/` | POST | `{"exam":1,"statement":"¿Qué es REST?","score":2,"choices":[{"text":"Estilo arquitectónico","is_correct":true},{"text":"Lenguaje","is_correct":false},{"text":"Base de datos","is_correct":false}]}` | 201: pregunta creada con `id`, `exam`, `statement`, `score`, `choices` (array con `id`, `text`, `is_correct`) |
+| **Questions** | `/questions/` | POST | `{"exam":5,"statement":"¿Qué es REST?","score":2,"choices":[{"text":"Estilo arquitectónico","is_correct":true},{"text":"Lenguaje","is_correct":false},{"text":"Base de datos","is_correct":false}]}` | 201: pregunta creada con `id`, `exam`, `statement`, `score`, `choices` (array con `id`, `text`, `is_correct`) |
 | **Questions** | `/questions/{id}/` | GET | — | 200: pregunta con sus choices anidadas |
 | **Questions** | `/questions/{id}/` | PATCH | `{"statement":"¿Qué es REST exactamente?"}` | 200: pregunta actualizada (choices se conservan si no se envían) |
+| **Questions** | `/questions/{id}/` | PATCH | `{"choices":[{"text":"A","is_correct":true},{"text":"B","is_correct":false}]}` | 200: reemplaza todas las opciones anteriores por las enviadas (aplica la validación) |
 | **Questions** | `/questions/{id}/` | DELETE | — | 204: sin contenido |
 | **Choices** | `/choices/` | GET | — | 200: lista paginada de opciones |
-| **Choices** | `/choices/` | POST | `{"question":1,"text":"Nueva opción","is_correct":false}` | 201: opción creada con `id`, `question`, `text`, `is_correct` |
+| **Choices** | `/choices/` | POST | `{"question":15,"text":"Nueva opción","is_correct":false}` | 201: opción creada con `id`, `question`, `text`, `is_correct` |
 | **Choices** | `/choices/{id}/` | GET | — | 200: opción individual |
 | **Choices** | `/choices/{id}/` | PATCH | `{"is_correct":true}` | 200: opción actualizada |
 | **Choices** | `/choices/{id}/` | DELETE | — | 204: sin contenido |
@@ -56,11 +59,13 @@
 
 | Error | Cuerpo enviado | Código | Mensaje exacto |
 |-------|----------------|--------|----------------|
-| Campo obligatorio ausente (`statement`) | `{"exam":1,"score":1,"choices":[{"text":"A","is_correct":true},{"text":"B","is_correct":false}]}` | 400 | `{"statement":["This field is required."]}` |
+| Campo obligatorio ausente (`statement`) | `{"exam":5,"score":1,"choices":[{"text":"A","is_correct":true},{"text":"B","is_correct":false}]}` | 400 | `{"statement":["This field is required."]}` |
 | Tipo incorrecto (`exam` como string) | `{"exam":"abc","statement":"Valid","score":2,"choices":[{"text":"A","is_correct":true},{"text":"B","is_correct":false},{"text":"C","is_correct":false}]}` | 400 | `{"exam":["Incorrect type. Expected pk value, received str."]}` |
-| Validación: dos opciones correctas | `{"exam":1,"statement":"Q","score":2,"choices":[{"text":"A","is_correct":true},{"text":"B","is_correct":true},{"text":"C","is_correct":false}]}` | 400 | `{"choices":["A question must have exactly one correct choice."]}` |
-| Validación: menos de dos opciones | `{"exam":1,"statement":"Q","score":2,"choices":[{"text":"A","is_correct":true}]}` | 400 | `{"choices":["A question needs at least two choices."]}` |
-| Recurso inexistente (GET/DELETE/PATCH) | — | 404 | `{"detail":"Not found."}` |
+| Validación: dos opciones correctas | `{"exam":5,"statement":"Q","score":2,"choices":[{"text":"A","is_correct":true},{"text":"B","is_correct":true},{"text":"C","is_correct":false}]}` | 400 | `{"choices":["A question must have exactly one correct choice."]}` |
+| Validación: menos de dos opciones | `{"exam":5,"statement":"Q","score":2,"choices":[{"text":"A","is_correct":true}]}` | 400 | `{"choices":["A question needs at least two choices."]}` |
+| Recurso inexistente: Exam (GET /exams/999/) | — | 404 | `{"detail":"No Exam matches the given query."}` |
+| Recurso inexistente: Question (GET /questions/999/) | — | 404 | `{"detail":"No Question matches the given query."}` |
+| Recurso inexistente: Choice (GET /choices/999/) | — | 404 | `{"detail":"No Choice matches the given query."}` |
 
 ---
 
@@ -70,3 +75,4 @@
 - **Examen por identificador:** el campo `exam` en `QuestionSerializer` es una clave primaria (PrimaryKeyRelatedField) para evitar repetir los datos del examen en cada pregunta; el cliente obtiene el examen desde `/exams/` si lo necesita.
 - **PATCH sin choices conserva las opciones:** al hacer una actualización parcial sin enviar `choices`, las opciones existentes se mantienen con sus mismos IDs.
 - **Validación de exactamente una opción correcta:** `validate_choices` en `QuestionSerializer` exige que haya exactamente una choice con `is_correct=true` y al menos dos opciones en total.
+- **Limitación conocida:** la regla de exactamente una opción correcta se valida en `/questions/` (opciones anidadas). El recurso `/choices/` no la valida, por lo que modificar `is_correct` desde allí puede dejar una pregunta con cero o dos correctas. La forma recomendada de cambiar las opciones es un PATCH a `/questions/{id}/` enviando `choices`.
