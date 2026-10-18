@@ -1,133 +1,104 @@
-# Quiz App — Django
+# Quiz App — Lab 08: API REST con Django REST Framework
 
-Proyecto del laboratorio de Semana 3 (Desarrollo de Aplicaciones Empresariales):
-creación de modelos, migraciones, formularios con formset y administración para un
-sistema de gestión de exámenes tipo quiz.
+API REST construida sobre el proyecto de cuestionarios del Lab 03 (modelos Exam, Question, Choice con validación de exactamente una opción correcta).
 
 **Autor:** Alexander Faustino
 
-## ¿Qué hace este proyecto?
+## ¿Qué hace esta API?
 
-Permite **crear y gestionar** exámenes compuestos por preguntas de opción múltiple:
+Expone los tres recursos principales como endpoints REST:
 
-- Un **Exam** (examen) tiene un título, una descripción y varias preguntas.
-- Cada **Question** (pregunta) pertenece a un examen, tiene un enunciado y un puntaje
-  (`score`), y tiene varias opciones de respuesta.
-- Cada **Choice** (opción) tiene un texto y un indicador de si es la respuesta
-  correcta (`is_correct`).
+| Recurso | Endpoint | Descripción |
+|---------|----------|-------------|
+| Exams | `/api/exams/` | CRUD de exámenes con preguntas anidadas en el detalle |
+| Questions | `/api/questions/` | CRUD de preguntas con choices anidadas y escribibles |
+| Choices | `/api/choices/` | CRUD independiente de opciones |
 
-Este proyecto **no** incluye la experiencia de "rendir" el examen (elegir una
-respuesta sin saber cuál es la correcta y obtener un puntaje al final) — eso queda
-fuera del alcance de este laboratorio, que se enfoca en la parte de modelado y
-administración.
+Características:
+- Paginación de 5 elementos por página
+- Filtrado (`?exam=`, `?question=`, `?is_correct=`)
+- Búsqueda (`?search=` en `statement` y `title`)
+- Validación de negocio: mínimo 2 choices, exactamente 1 correcta
+- Permiso `AllowAny` (solo desarrollo)
 
-## Funcionalidad implementada
+## Cómo ejecutarlo
 
-| Función | Dónde |
-|---|---|
-| Listado de exámenes | `http://127.0.0.1:8000/quiz/` |
-| Detalle de un examen (preguntas + opciones, correcta resaltada) | `http://127.0.0.1:8000/quiz/<id>/` |
-| Alta de pregunta con sus opciones (formset) | `http://127.0.0.1:8000/quiz/question/new/?exam=<id>` |
-| Administración de exámenes, preguntas y opciones | `http://127.0.0.1:8000/admin/` |
+```powershell
+cd Lab08-DAE
 
+# 1. Copiar variables de entorno
+copy .env.example .env
 
-## Estructura del proyecto
+# 2. Crear y activar entorno virtual
+python -m venv venv
+venv\Scripts\activate
+
+# 3. Instalar dependencias
+venv\Scripts\python -m pip install -r requirements.txt
+
+# 4. Migrar base de datos
+cd src
+..\venv\Scripts\python manage.py migrate
+
+# 5. Cargar datos de prueba (idempotente)
+..\venv\Scripts\python manage.py seed_quiz
+
+# 6. Levantar servidor
+..\venv\Scripts\python manage.py runserver
+```
+
+Abrir `http://127.0.0.1:8000/api/` en el navegador o usar el cliente REST.
+
+## Direcciones principales
+
+| Recurso | URL |
+|---------|-----|
+| API raíz (browsable) | `http://127.0.0.1:8000/api/` |
+| Exams | `http://127.0.0.1:8000/api/exams/` |
+| Questions | `http://127.0.0.1:8000/api/questions/` |
+| Choices | `http://127.0.0.1:8000/api/choices/` |
+| Admin Django | `http://127.0.0.1:8000/admin/` |
+| App HTML (Lab 03) | `http://127.0.0.1:8000/quiz/` |
+
+## Documentación
+
+- **Tabla completa de la API:** [`docs/API.md`](docs/API.md)
+- **Colección REST Client (`.http`):** [`docs/api.http`](docs/api.http) — lista, detalle, crear, actualizar, borrar, filtros, búsqueda, paginación y casos de error
+
+## Estructura del proyecto (resumen)
 
 ```
-Lab03-DAE/
-├── .opencode/
-│   └── agent/              # agentes de OpenCode usados para construir el proyecto
-├── venv/                   # entorno virtual 
-├── config/                 # carpeta de la estructura del curso
+Lab08-DAE/
+├── .opencode/agent/           # Agentes de OpenCode
+├── docs/
+│   ├── API.md                 # Documentación de la API (este archivo)
+│   └── api.http               # Peticiones para REST Client (VS Code)
 ├── src/
-│   ├── manage.py            # en la raíz de src/ 
-│   ├── config/               # proyecto Django (settings, urls raíz, wsgi, asgi)
-│   │   └── config/
-│   │       ├── settings.py   # SECRET_KEY, DEBUG, ALLOWED_HOSTS desde .env
-│   │       └── urls.py
-│   └── quiz/                # app principal
-│       ├── models.py         # Exam, Question, Choice
-│       ├── forms.py          # ExamForm, QuestionForm, ChoiceFormSet
-│       ├── views.py          # exam_list, exam_detail, question_create
-│       ├── urls.py           # rutas con app_name = 'quiz'
-│       ├── admin.py          # registro de modelos con inlines
-│       ├── migrations/       # 0001_initial, 0002_question_score
-│       └── templates/quiz/   # base.html, exam_list.html, exam_detail.html,
-│                              # question_form.html
+│   ├── manage.py
+│   ├── config/config/
+│   │   ├── settings.py        # REST_FRAMEWORK, INSTALLED_APPS
+│   │   └── urls.py            # /api/ → quiz.api_urls
+│   └── quiz/
+│       ├── models.py          # Exam, Question, Choice (Lab 03)
+│       ├── serializers.py     # ModelSerializers con choices anidadas
+│       ├── api_views.py       # ModelViewSets + filtros/búsqueda
+│       ├── api_urls.py        # DefaultRouter
+│       ├── management/commands/seed_quiz.py  # Datos de prueba
+│       ├── tests.py           # Tests de serializers (paso 4)
+│       ├── views.py           # Vistas HTML (Lab 03, intactas)
+│       └── urls.py            # Rutas HTML (Lab 03, intactas)
 ├── .env / .env.example
-├── requirements.txt
+├── requirements.txt           # UTF-8, con DRF y django-filter
 └── .gitignore
 ```
 
-## Cómo correrlo
+## Datos de prueba (seed_quiz)
 
-```powershell
-cd Lab03-DAE
-venv\Scripts\activate
-cd src
-python manage.py runserver
-```
+Ejecuta `..\venv\Scripts\python manage.py seed_quiz` desde `src/` para cargar:
 
-Abrir `http://127.0.0.1:8000/quiz/` en el navegador. Para entrar al admin, usar el
-superusuario creado con `python manage.py createsuperuser`.
+- **2 exámenes:** "Python Basics" (7 preguntas) y "Django ORM" (5 preguntas)
+- **12 preguntas** con score 1–3
+- **36 opciones** (3 por pregunta, exactamente 1 correcta)
+- **4 preguntas** contienen "list" en el enunciado (para probar `?search=list`)
 
-Si es la primera vez que se clona el repositorio, copiar `.env.example` a `.env` y
-completar `SECRET_KEY` con cualquier valor antes de correr el servidor.
-
-## Los 3 modelos y justificación de tipos de campo
-
-### Exam
-| Campo | Tipo | Por qué |
-|---|---|---|
-| `title` | `CharField(max_length=150)` | Texto corto con longitud controlada; permite validación a nivel de base de datos y formularios, ideal para títulos. |
-| `description` | `TextField(blank=True)` | Texto largo sin límite fijo; `blank=True` lo hace opcional en formularios y admin. |
-| `created_at` | `DateTimeField(auto_now_add=True)` | Registra automáticamente la fecha/hora de creación (inmutable), garantizando auditoría sin intervención del usuario. |
-
-### Question
-| Campo | Tipo | Por qué |
-|---|---|---|
-| `exam` | `ForeignKey(Exam, on_delete=CASCADE, related_name='questions')` | Relación obligatoria padre-hijo; `CASCADE` evita preguntas huérfanas al borrar el examen. |
-| `statement` | `CharField(max_length=255)` | Enunciado breve con longitud acotada; validación nativa en base de datos y formularios. |
-| `score` | `PositiveIntegerField(default=1)` | Entero ≥ 0 para la puntuación; `default=1` simplifica la creación y evita valores nulos. |
-
-### Choice
-| Campo | Tipo | Por qué |
-|---|---|---|
-| `question` | `ForeignKey(Question, on_delete=CASCADE, related_name='choices')` | Vincula cada opción a su pregunta; `CASCADE` mantiene la integridad referencial. |
-| `text` | `CharField(max_length=200)` | Texto de la opción con límite razonable; validación automática. |
-| `is_correct` | `BooleanField(default=False)` | Decisión binaria (correcta/incorrecta) nativa en base de datos; `default=False` obliga a marcar explícitamente la correcta. |
-
-## Migraciones
-
-- `0001_initial.py`: crea las tablas `quiz_exam`, `quiz_question` y `quiz_choice` con
-  todos sus campos y relaciones.
-- `0002_question_score.py`: agrega el campo `score` (`PositiveIntegerField`,
-  `default=1`) a `Question` mediante `migrations.AddField`. En SQL equivale a
-  `ALTER TABLE quiz_question ADD COLUMN score integer NOT NULL DEFAULT 1`, dejando
-  el valor 1 en las preguntas ya existentes.
-
-## Casos de prueba — validación del formset
-
-Probados manualmente en `http://127.0.0.1:8000/quiz/question/new/?exam=1`:
-
-| Caso | Acción | Resultado esperado | Resultado obtenido |
-|---|---|---|---|
-| Exactamente 1 correcta | Marcar una sola opción como `is_correct` | Guarda la pregunta y redirige al detalle del examen |  Correcto |
-| 0 correctas | No marcar ninguna opción | No guarda nada, muestra "Debe haber exactamente una opción correcta.", conserva los datos escritos |  Correcto |
-| 2 o más correctas | Marcar dos o más opciones | Mismo comportamiento que el caso anterior |  Correcto |
-
-## Capturas
-
-![alt text](Captura1.jpeg)
-
-![alt text](Captura2.jpeg)
-
-![alt text](Captura3.jpeg)
-
-![alt text](image.png)
-
-![alt text](image-1.png)
-
-![alt text](image-2.png)
-
-![alt text](image-3.png)
+El comando es idempotente: borra datos previos y vuelve a crearlos.
