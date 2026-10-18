@@ -37,3 +37,48 @@ DELETE {{baseUrl}}/questions/{{createQuestion.response.body.id}}/
 
 ### Comprobar eliminación (esperado 404)
 GET {{baseUrl}}/questions/{{createQuestion.response.body.id}}/
+
+# ===== Paso 9: errores provocados a propósito =====
+
+### Error 1: campo obligatorio ausente (esperado 400)
+POST {{baseUrl}}/questions/
+Content-Type: application/json
+
+{
+  "exam": {{examId}},
+  "score": 1,
+  "choices": [
+    {"text": "Choice A", "is_correct": true},
+    {"text": "Choice B", "is_correct": false}
+  ]
+}
+
+### Error 2: tipo incorrecto (esperado 400)
+POST {{baseUrl}}/questions/
+Content-Type: application/json
+
+{
+  "exam": "abc",
+  "statement": "Valid statement",
+  "score": 2,
+  "choices": [
+    {"text": "Choice A", "is_correct": true},
+    {"text": "Choice B", "is_correct": false},
+    {"text": "Choice C", "is_correct": false}
+  ]
+}
+
+### Error 3: validación de la opción correcta (esperado 400)
+POST {{baseUrl}}/questions/
+Content-Type: application/json
+
+{
+  "exam": {{examId}},
+  "statement": "Question with two correct choices",
+  "score": 2,
+  "choices": [
+    {"text": "Choice A", "is_correct": true},
+    {"text": "Choice B", "is_correct": true},
+    {"text": "Choice C", "is_correct": false}
+  ]
+}
