@@ -31,6 +31,9 @@ staticfiles/
 .DS_Store
 Thumbs.db
 
+# Documents
+*.docx
+
 # Testing
 .coverage
 htmlcov/
