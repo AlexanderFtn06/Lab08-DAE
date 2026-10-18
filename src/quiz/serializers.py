@@ -63,6 +63,23 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = ["id", "exam", "statement", "score", "choices"]
         read_only_fields = ["id"]
 
+    def validate_choices(self, value):
+        """Validate business rules for question choices.
+
+        - A question needs at least two choices.
+        - A question must have exactly one correct choice.
+        """
+        if len(value) < 2:
+            raise serializers.ValidationError(
+                "A question needs at least two choices."
+            )
+        correct_count = sum(1 for choice in value if choice.get("is_correct"))
+        if correct_count != 1:
+            raise serializers.ValidationError(
+                "A question must have exactly one correct choice."
+            )
+        return value
+
     def create(self, validated_data):
         """Create a question with its nested choices."""
         choices_data = validated_data.pop("choices")
